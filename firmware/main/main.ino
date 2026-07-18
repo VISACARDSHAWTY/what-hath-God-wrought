@@ -11,7 +11,7 @@ int column = 0;
 
 int message[48];
 int length = 0;
-int morse[26] = {12 , 2111 , 2121 ,211 , 1 , 1121 , 221 , 1111 , 11 , 1222 , 212 , 1211 , 22 , 21 ,222 , 1221 ,2212 , 121 , 111 , 2 , 112 , 1112 , 122 , 2112 , 2122 , 2211};
+const char* morse[26] = {"12" , "2111" , "2121" ,"211" , "1" , "1121" , "221" , "1111" , "11" , "1222" , "212" , "1211" , "22" , "21" ,"222" , "1221" ,"2212" , "121" , "111" , "2" , "112" , "1112" , "122" , "2112" , "2122" , "2211"};
 void setup() {
   Serial.begin(115200);
   Wire.begin(21, 22);
@@ -28,8 +28,42 @@ void setup() {
   pinMode(VRY , INPUT);
   memset(message, 0, sizeof(message));
 }
+
 void send_message() {
-  
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(5, 0);
+  lcd.print("Sending");
+  lcd.setCursor(3, 1);
+  lcd.print("Message...");
+
+  for (int i = 0 ; i < length ; i++ ) {
+    if (message[i] == -1) {
+      delay(2500);
+      Serial.print(" / ");
+    }
+    else {
+      for (int j = 0; morse[message[i]][j] != '\0'; j++) {
+          if(morse[message[i]][j] == '1') {
+            digitalWrite(BUZZER, HIGH);
+            delay(200);
+            digitalWrite(BUZZER, LOW);
+            delay(200);
+            Serial.print(".");
+          }
+          else {
+            digitalWrite(BUZZER, HIGH);
+            delay(600);
+            digitalWrite(BUZZER, LOW);
+            delay(200);
+            Serial.print("_");
+          }
+      }
+    }
+    Serial.print(" ");
+    delay(600);
+  }
+  Serial.println("");
 }
 
 void loop() {
@@ -100,6 +134,15 @@ void loop() {
       send_message();
       memset(message, 0, sizeof(message));
       length = 0;
+      lcd.init();
+      lcd.backlight();
+
+      lcd.setCursor(0, 0);
+      lcd.print("ABCDEFGHIJKLMNOP");
+      lcd.setCursor(0, 1);
+      lcd.print("QRSTUVWXYZ_>");  
+      row = 0;
+      column = 0;
     }
     else {
       if(length > 47) {
